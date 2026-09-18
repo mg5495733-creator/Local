@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تسجيل الدخول - استضافة البوتات</title>
+<link rel="stylesheet" href="/public/style.css">
+</head>
+<body class="login-body">
+  <div class="login-box">
+    <h1>🤖 استضافة البوتات</h1>
+    <p class="subtitle">أدخل كلمة المرور للدخول للوحة التحكم</p>
+    <form method="POST" action="/login">
+      <input type="password" name="password" placeholder="كلمة المرور" required autofocus>
+      <button type="submit">دخول</button>
+    </form>
+    <% if (error) { %>
+      <p class="error"><%= error %></p>
+    <% } %>
+  </div>
+</body>
+</html>

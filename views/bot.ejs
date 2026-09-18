@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title><%= bot.name %> - إدارة البوت</title>
+<link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a href="/" class="back">→ رجوع</a>
+    <h1>🤖 <%= bot.name %></h1>
+    <a class="logout" href="/logout">خروج</a>
+  </div>
+
+  <div class="container bot-page">
+    <div class="card controls-card">
+      <div class="status-line">
+        الحالة الآن:
+        <span id="status-badge" class="status-<%= status %>"><%= status %></span>
+      </div>
+      <div class="buttons-row">
+        <form method="POST" action="/bot/<%= bot.id %>/start"><button class="btn green">▶ تشغيل</button></form>
+        <form method="POST" action="/bot/<%= bot.id %>/stop"><button class="btn red">⏹ إيقاف</button></form>
+        <form method="POST" action="/bot/<%= bot.id %>/restart"><button class="btn blue">🔄 إعادة تشغيل</button></form>
+        <form method="POST" action="/bot/<%= bot.id %>/autorestart">
+          <button class="btn <%= autoRestart ? 'green' : 'gray' %>">
+            إعادة تشغيل تلقائي عند التوقف: <%= autoRestart ? 'مفعّل' : 'معطّل' %>
+          </button>
+        </form>
+        <form method="POST" action="/bot/<%= bot.id %>/delete" onsubmit="return confirm('متأكد تريد حذف البوت نهائياً؟')">
+          <button class="btn dark">🗑 حذف البوت</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="editor-layout">
+      <div class="card files-card">
+        <h3>📁 الملفات</h3>
+        <ul class="file-list">
+          <% files.forEach(f => { %>
+            <li class="file-item" data-path="<%= f %>"><%= f %></li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <div class="card editor-card">
+        <h3 id="editor-title">اختر ملف من القائمة للتعديل</h3>
+        <textarea id="editor-area" spellcheck="false" placeholder="محتوى الملف سيظهر هنا..."></textarea>
+        <div class="editor-actions">
+          <label class="checkbox-label">
+            <input type="checkbox" id="restart-after-save" checked>
+            إعادة تشغيل البوت بعد الحفظ
+          </label>
+          <button id="save-btn" class="btn green">💾 حفظ التعديلات</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card logs-card">
+      <h3>📜 سجل التشغيل (Logs)</h3>
+      <pre id="logs-box"><%= logs %></pre>
+    </div>
+  </div>
+
+<script>
+const botId = "<%= bot.id %>";
+let currentFile = null;
+
+document.querySelectorAll('.file-item').forEach(li => {
+  li.addEventListener('click', async () => {
+    currentFile = li.dataset.path;
+    document.getElementById('editor-title').innerText = '📝 ' + currentFile;
+    const res = await fetch(`/bot/${botId}/file?path=` + encodeURIComponent(currentFile));
+    const data = await res.json();
+    document.getElementById('editor-area').value = data.content || ('# ' + (data.error || ''));
+  });
+});
+
+document.getElementById('save-btn').addEventListener('click', async () => {
+  if (!currentFile) { alert('اختر ملف أولاً'); return; }
+  const content = document.getElementById('editor-area').value;
+  const restart = document.getElementById('restart-after-save').checked;
+  const res = await fetch(`/bot/${botId}/file`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: currentFile, content, restart: restart ? 'true' : 'false' })
+  });
+  const data = await res.json();
+  if (data.ok) alert('تم الحفظ بنجاح ✅' + (restart ? ' وجاري إعادة التشغيل' : ''));
+  else alert('خطأ: ' + data.error);
+});
+
+// تحديث حي للسجل والحالة كل ثانيتين
+setInterval(async () => {
+  const res = await fetch(`/bot/${botId}/logs`);
+  const data = await res.json();
+  const box = document.getElementById('logs-box');
+  box.innerText = data.logs;
+  box.scrollTop = box.scrollHeight;
+  const badge = document.getElementById('status-badge');
+  badge.innerText = data.status;
+  badge.className = 'status-' + data.status;
+}, 2000);
+</script>
+</body>
+</html>

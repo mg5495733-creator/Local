@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لوحة استضافة البوتات</title>
+<link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <h1>🤖 لوحة استضافة البوتات</h1>
+    <a class="logout" href="/logout">خروج</a>
+  </div>
+
+  <div class="container">
+    <div class="card upload-card">
+      <h2>➕ رفع بوت جديد</h2>
+      <p class="hint">ارفع ملف واحد (.js أو .py) أو ملف مضغوط (.zip) يحتوي على مشروع كامل. سيتم اكتشاف المكتبات وتثبيتها تلقائياً وتشغيل البوت مباشرة.</p>
+      <form method="POST" action="/bots/create" enctype="multipart/form-data" class="upload-form">
+        <input type="text" name="name" placeholder="اسم البوت" required>
+        <input type="file" name="file" accept=".js,.py,.zip" required>
+        <button type="submit">رفع وتشغيل</button>
+      </form>
+      <p class="counter"><%= bots.length %> / <%= maxBots %> بوت مستضاف</p>
+    </div>
+
+    <div class="bots-grid">
+      <% if (bots.length === 0) { %>
+        <p class="empty">لا يوجد أي بوت بعد، ابدأ برفع أول بوت 👆</p>
+      <% } %>
+      <% bots.forEach(bot => { %>
+        <a class="bot-card status-<%= bot.status %>" href="/bot/<%= bot.id %>">
+          <div class="bot-card-top">
+            <span class="bot-name"><%= bot.name %></span>
+            <span class="badge <%= bot.type %>"><%= bot.type === 'node' ? 'Node.js' : 'Python' %></span>
+          </div>
+          <div class="bot-status">
+            <span class="dot"></span>
+            <%= bot.status === 'running' ? 'يعمل الآن' : (bot.status === 'crashed' ? 'متوقف (خطأ)' : 'متوقف') %>
+          </div>
+          <div class="bot-entry">تشغيل: <%= bot.entry %></div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+</body>
+</html>

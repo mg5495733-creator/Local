@@ -1,0 +1,21 @@
+{
+  "name": "bot-host-panel",
+  "version": "1.0.0",
+  "description": "لوحة تحكم لاستضافة عدة بوتات (Node.js / Python) مع تركيب المكتبات تلقائياً",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "multer": "^1.4.5-lts.1",
+    "adm-zip": "^0.5.12",
+    "lowdb": "^1.0.0",
+    "ejs": "^3.1.10",
+    "tree-kill": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
